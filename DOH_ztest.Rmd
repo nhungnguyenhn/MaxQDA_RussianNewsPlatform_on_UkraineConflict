@@ -1,0 +1,937 @@
+---
+title: "DOH_ztest"
+author: "Nhung"
+date: '2022-09-23'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+m <- read_csv("DOH.csv")
+m
+
+```
+
+
+```{r}
+table(m$RiskFactor_2_CTA)
+table(m$SocialDisparities_3_CTA)
+table(m$Debunk_4_CTA)
+table(m$UncertaintyReduction_5_CTA)
+table(m$Testing_6_CTA)
+table(m$Vaccine_7_CTA)
+
+```
+
+
+```{r}
+p <- read_csv("DOH1.csv")
+p
+```
+
+```{r}
+colnames(p)
+```
+
+```{r}
+summary(p)
+```
+
+
+```{r}
+p1 <- p %>% 
+  mutate(RiskFactor_2_CTA = recode(RiskFactor_2_CTA, '88' = 0, 
+                                                       '0'=1, '1'=1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                        '6'=1, '7'=1, '8'=1, '9'=1, '10'=1, 
+                                                        '11'=1, '12'=1, '13'=1, '14'= 1, '15' =1, 
+                                                        '16' =1, '18' =1, '20'=1, '25'=1, '26'=1)) %>%  
+         
+   mutate(SocialDisparities_3_CTA = recode(SocialDisparities_3_CTA, '88' = 0, 
+                                                        '0'=1, '1'=1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                        '6'=1, '7'=1, '8'=1, '9'=1, '10'=1, 
+                                                        '11'=1, '12'=1, '13'=1, '14'= 1, '15' =1, 
+                                                        '26'=1)) %>% 
+   
+   mutate(Debunk_4_CTA = recode(Debunk_4_CTA,'88' = 0, 
+                                                '0'=1, '1'= 1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                        '6'=1, '7'=1, '8'= 1, '9'= 1, '10'=1, 
+                                                        '11'=1, '15' =1)) %>% 
+          
+  
+   mutate(UncertaintyReduction_5_CTA =recode(UncertaintyReduction_5_CTA, '88' = 0, 
+                                                        '0'=1, '1'=1, '2'=1,  '3'=1, '4'=1, '5'=1,
+                                                        '6'=1, '7'=1, '8'= 1, '9'=1, '10'=1, 
+                                                        '11'=1, '12'=1, '13'=1, '14'= 1, '15' =1, 
+                                                        '16' =1, '17'= 1, '18' =1, '25'=1, '26'=1)) %>% 
+  
+     mutate(Testing_6_CTA = recode(Testing_6_CTA, '88' = 0, 
+                                                   '0'=1, '1'=1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                    '6'=1, '7'=1, '8'=1, '9'=1, '10'=1, 
+                                                    '11'=1, '12'=1, '13'=1, '14'= 1, '15' =1, 
+                                                    '18' =1, '25'=1, '26'=1)) %>%  
+         
+      mutate( Vaccine_7_CTA = recode(Vaccine_7_CTA, '88' = 0, 
+                                                  '0'=1, '1'=1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                  '6'=1, '7'=1, '8'=1, '9'=1, '15' =1)) %>% 
+  mutate( Action_13_CTA = recode(Action_13_CTA, '88' = 0, 
+                                                  '0'=1, '1'=1, '2'=1, '3'=1, '4'=1, '5'=1,
+                                                  '6'=1, '7'=1, '8'=1, '9'=1, '15' =1,  '16' =1, '18' =1, 
+                                                  '25'=1, '26'=1))
+
+p1 
+         
+```
+
+
+
+
+```{r}
+table(p1$Action_13_CTA)
+table(p1$Positive_14a_Number)
+table(p1$Negative_14b_Number)
+table(p1$Individual_14c_Number)
+table(p1$Collective_14d_Number)
+
+```
+
+
+
+```{r}
+p2 <- p1 %>% 
+  select(-"Mental_8_YesNo", 
+         -"Emotion_9_Number", 
+         - "Praise_10_Number", 
+         -"Pop_11_Number", 
+         -"Language_12_Number") %>% 
+  mutate(efficacy_total = Individual_14c_Number + Collective_14d_Number) %>% 
+  mutate(efficacy_total1 = Negative_14b_Number + Positive_14a_Number) %>%
+  mutate(Gov_poli = factor(Gov_poli, levels = c(1,2), labels = c("Republican", "Democratic"))) %>% 
+  mutate(Trifecta = factor(Trifecta, levels = c(1,2,3), labels = c("Republican", "Democratic", "Mixture")))
+p2
+levels(p2$Gov_poli)
+```
+
+```{r}
+ggplot(p2, aes(Action_13_CTA , fill = RiskFactor_2_CTA)) +
+  geom_histogram() +
+  scale_x_log10() +
+  facet_grid(RiskFactor_2_CTA ~ ., margins=TRUE, scales="free_y")
+```
+
+
+```{r}
+ggplot(p2, aes(Positive_14a_Number , fill = SocialDisparities_3_CTA)) +
+  geom_histogram() +
+  scale_x_log10() +
+  facet_grid(SocialDisparities_3_CTA ~ ., margins=TRUE, scales="free_y")
+```
+
+
+```{r}
+ggplot(p2, aes(Negative_14b_Number, fill = RiskFactor_2_CTA)) +
+  geom_histogram() +
+  scale_x_log10() +
+  facet_grid(RiskFactor_2_CTA ~ ., margins=TRUE, scales="free_y")
+```
+
+```{r}
+ggplot(p2, aes(Individual_14c_Number, fill = RiskFactor_2_CTA)) +
+  geom_histogram() +
+  scale_x_log10() +
+  facet_grid(RiskFactor_2_CTA ~ ., margins=TRUE, scales="free_y")
+```
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Action_13_CTA, 
+          main = "Density plot of Action_13_CTA",
+          xlab = "Individual_Action_13_CTA")
+```
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Positive_14a_Number, 
+          main = "Density plot of Positive_14a_Number",
+          xlab = "Individual_Positive_14a_Number")
+```
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Negative_14b_Number, 
+          main = "Negative_14b_Number",
+          xlab = "Negative_14b_Number")
+```
+
+
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Individual_14c_Number, 
+          main = "Density plot of Individual_14c_Number",
+          xlab = "Individual_14c_Number")
+```
+
+
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Collective_14d_Number, 
+          main = "Density plot of collective efficacy",
+          xlab = "Collective efficacy")
+```
+
+
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$minority_percent, 
+          main = "Density plot of minority_percent",
+          xlab = "minority_percent")
+```
+
+minority_percent Poverty_percent
+```{r}
+library("dplyr")
+library("ggpubr")
+ggdensity(p2$Poverty_percent, 
+          main = "Density plot of Poverty_percent",
+          xlab = "Poverty_percent")
+```
+
+
+```{r}
+summary(p1)
+```
+
+
+# z-test efficacy positive - negative
+
+#https://rpubs.com/nguyenminhsang/two-sample_z-test
+
+```{r}
+# Set difference to be tested
+d0<-0
+d0
+
+# Set standard deviation of sample with status 0
+sigma0<-sd(p1$Positive_14a_Number)
+sigma0
+
+# Set standard deviation of sample with status 1
+sigma1<-sd(p1$Negative_14b_Number)
+sigma1
+
+
+#Calculate the two means 
+ mean_positive <- mean(p1$Positive_14a_Number)
+ mean_positive
+ mean_negative <- mean(p1$Negative_14b_Number)
+ mean_negative
+ 
+ #Calculate the two lengths
+n_positive<-length(p1$Positive_14a_Number)
+n_positive
+n_negative<-length(p1$Negative_14b_Number)
+n_negative
+
+# Calculate test statistic and two-sided p-value
+
+z<-((mean_positive- mean_negative)-d0)/
+  sqrt(sigma0^2/n_positive+
+         sigma1^2/n_negative)
+z
+
+p_value=2*pnorm(-abs(z))
+p_value
+
+```
+
+###RQ1: To what extent do state health departments use self-efficacy statements (Q14 a vs Q14b AND Q14c vs. Q14d) in their Facebook posts between Jan-Dec, 2020?
+
+# z-test efficacy positive - negative 
+
+```{r}
+# Set difference to be tested
+d1_0<-0
+d1_0
+
+# Set standard deviation of sample with status 0
+sigma1_0<-sd(p1$Individual_14c_Number)
+sigma1_0
+
+# Set standard deviation of sample with status 1
+sigma1_1<-sd(p1$Collective_14d_Number)
+sigma1_1
+
+
+#Calculate the two means 
+ mean_individual <- mean(p1$Individual_14c_Number)
+ mean_individual 
+ mean_collective <- mean(p1$Collective_14d_Number)
+ mean_collective
+ 
+ #Calculate the two lengths
+n_individual <-length(p1$Individual_14c_Number)
+n_individual 
+n_collective<-length(p1$Collective_14d_Number)
+n_collective
+
+# Calculate test statistic and two-sided p-value
+
+z1 <-((mean_individual-mean_collective)-d1_0)/
+  sqrt(sigma1_0^2/n_individual + 
+         sigma1_1^2/n_collective)
+z1
+
+p_value1 =2*pnorm(-abs(z))
+p_value1 
+
+```
+
+
+###RQ3:  How do self-efficacy statements in posts differ between states governed by Democrat and Republican governors?
+
+```{r}
+#fit0 <- t.test(
+#  formula = efficacy_total1 ~ Gov_poli, 
+#  data = p2, 
+#  paired = FALSE, 
+ # var.equal = TRUE)
+#(fit0)
+#library(parameters)
+#model_parameters(fit0)
+```
+
+
+
+```{r}
+fit <- t.test(
+  formula = efficacy_total ~ Gov_poli, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+(fit)
+library(parameters)
+model_parameters(fit)
+```
+
+```{r}
+fit1 <- t.test(
+  formula = Positive_14a_Number ~ Gov_poli, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+(fit1)
+library(parameters)
+model_parameters(fit1)
+```
+
+
+
+```{r}
+fit2 <- t.test(
+  formula = Negative_14b_Number ~ Gov_poli, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+(fit2)
+library(parameters)
+model_parameters(fit2)
+```
+
+
+
+
+```{r}
+fit3 <- t.test(
+  formula = Individual_14c_Number ~ Gov_poli, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+(fit3)
+library(parameters)
+model_parameters(fit3)
+```
+
+
+```{r}
+fit4 <- t.test(
+  formula = Collective_14d_Number ~ Gov_poli, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+(fit1)
+library(parameters)
+model_parameters(fit4)
+```
+
+
+
+```{r}
+library(effectsize)
+cohens_d(fit)
+cohens_d(fit1)
+cohens_d(fit2)
+cohens_d(fit3)
+cohens_d(fit4)
+
+```
+
+
+###RQ4:  How do self-efficacy statements in posts differ between states governed by Democrat and Republican states?
+
+```{r}
+colnames(p2)
+```
+
+```{r}
+levels(p2$Trifecta)
+```
+
+
+```{r}
+fit_0 <- aov(formula = efficacy_total ~ Trifecta, data = p2)
+summary(fit_0)
+model_parameters(fit_0)
+```
+
+
+```{r}
+library(ggeffects)
+gge_0 <- ggeffect(fit_0, "Trifecta")
+gge_0
+plot(gge_0, connect.lines = TRUE)
+```
+
+
+
+```{r}
+fit_1 <- aov(formula = Positive_14a_Number ~ Trifecta, data = p2)
+summary(fit_1)
+model_parameters(fit_1)
+```
+
+```{r}
+gge_1 <- ggeffect(fit_1, "Trifecta")
+gge_1
+plot(gge_1, connect.lines = TRUE)
+```
+
+
+```{r}
+fit_2 <- aov(formula = Negative_14b_Number ~ Trifecta, data = p2)
+summary(fit_2)
+model_parameters(fit_2)
+```
+
+```{r}
+gge_2 <- ggeffect(fit_2, "Trifecta")
+gge_2
+plot(gge_2, connect.lines = TRUE)
+```
+
+```{r}
+fit_3 <- aov(formula = Individual_14c_Number ~ Trifecta, data = p2)
+summary(fit_3)
+model_parameters(fit_3)
+
+```
+
+```{r}
+gge_3 <- ggeffect(fit_3, "Trifecta")
+gge_3
+plot(gge_3, connect.lines = TRUE)
+```
+
+```{r}
+fit_4 <- aov(formula = Collective_14d_Number ~ Trifecta, data = p2)
+summary(fit_4)
+model_parameters(fit_4)
+```
+
+
+```{r}
+gge_4 <- ggeffect(fit_4, "Trifecta")
+gge_4
+plot(gge_4, connect.lines = TRUE)
+```
+
+RQ5: How does the socio-economic status affect use of individual/collective self-efficacy in health communication messages? 
+
+```{r}
+p2 
+```
+```{r}
+colnames(p2)
+```
+
+
+```{r}
+p3 <-p2 %>% 
+  rename( White_percent = "White_\bpercent") %>% 
+
+  select(minority_percent, Poverty_percent, Positive_14a_Number, Negative_14b_Number, Individual_14c_Number, Collective_14d_Number, efficacy_total)
+p3
+```
+
+
+
+```{r}
+library(correlation)
+correlation(p3)
+```
+
+```{r}
+rmat <- correlation(p3)
+plot(summary(rmat))
+```
+
+###RQ6: To what extent do state health departments use call to action in relations to risk (Q2, 3,4,5,6,7)? 
+
+```{r}
+p2
+```
+
+```{r}
+colnames(p2)
+```
+
+```{r}
+p2$RiskFactor_2_CTA
+```
+
+
+```{r}
+fita_0 <- t.test(
+  formula = Action_13_CTA ~ RiskFactor_2_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_0
+
+library(parameters)
+model_parameters(fita_0)
+```
+
+
+```{r}
+fita_1 <- t.test(
+  formula = Action_13_CTA ~ SocialDisparities_3_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_1
+model_parameters(fita_1)
+```
+
+
+
+
+```{r}
+fita_2 <- t.test(
+  formula = Action_13_CTA ~ Debunk_4_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_2
+model_parameters(fita_2)
+```
+
+
+```{r}
+fita_3 <- t.test(
+  formula = Action_13_CTA ~ UncertaintyReduction_5_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_3
+model_parameters(fita_3)
+```
+
+
+```{r}
+fita_5 <- t.test(
+  formula = Action_13_CTA ~ Testing_6_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_5
+model_parameters(fita_5)
+```
+
+
+```{r}
+
+fita_6 <- t.test(
+  formula = Action_13_CTA ~ Vaccine_7_CTA, 
+  data = p2, 
+  paired = FALSE, 
+  var.equal = FALSE
+)
+fita_6
+model_parameters(fita_6)
+```
+
+
+```{r}
+library(effectsize)
+cohens_d(fita_0)
+cohens_d(fita_1)
+cohens_d(fita_2)
+cohens_d(fita_3)
+cohens_d(fita_5)
+cohens_d(fita_6)
+```
+
+
+
+RQ7: How does the socio-economic status affect use of call to action in health communication messages? 
+
+```{r}
+p4 <- p2 %>% 
+  select(minority_percent, Poverty_percent, Action_13_CTA)
+p4
+```
+
+```{r}
+correlation(p4)
+rmat1 <- correlation(p4)
+plot(summary(rmat1))
+```
+```{r}
+fit_0a <- lm(Action_13_CTA  ~ minority_percent,  data = p4 )
+fit_0a
+summary(fit_0a)
+model_parameters(fit_0a)
+library(ggeffects)
+plot(ggpredict(fit_0a, terms = "minority_percent"))
+```
+
+```{r}
+fit_0b <- lm(Action_13_CTA  ~ Poverty_percent,  data = p4 )
+fit_0b
+summary(fit_0b)
+model_parameters(fit_0b)
+library(ggeffects)
+plot(ggpredict(fit_0b, terms = "Poverty_percent"))
+```
+
+```{r}
+library(performance)
+compare_performance(fit_0a, fit_0b, metrics = c("R2", "R2_adj"))
+```
+
+
+Partial effects 
+
+```{r}
+fit_1a <- lm (Action_13_CTA  ~ minority_percent + Poverty_percent, data = p4 )
+fit_1a
+summary(fit_1a)
+```
+
+```{r}
+parameters(fit_1a)
+performance(fit_1a)
+plot(ggpredict(fit_1a, terms = c("minority_percent", "Poverty_percent[10,12,15]")))
+```
+
+
+Simple effect
+
+```{r}
+fit_1b <- lm (Action_13_CTA  ~ minority_percent * Poverty_percent, data = p4 )
+fit_1b
+summary(fit_1b)
+```
+
+
+```{r}
+parameters(fit_1b)
+performance(fit_1b)
+plot(ggpredict(fit_1b, terms = c("minority_percent", "Poverty_percent[10,12,15]")))
+```
+
+# no need centering because 0 % is meaningful 
+
+
+
+RQ8: How does efficacy statements predict call to actions? 
+
+
+```{r}
+p5 <- p2 %>% 
+  select(Action_13_CTA, Positive_14a_Number, Negative_14b_Number, Individual_14c_Number, Collective_14d_Number)
+p5
+```
+```{r}
+correlation(p5)
+rmat_1 <- correlation(p5)
+plot(summary(rmat_1))
+
+```
+
+Total effects 
+
+```{r}
+fita_0 <- lm(Action_13_CTA ~ Positive_14a_Number , data = p5 )
+fita_0
+summary (fita_0)
+fita_1 <- lm(Action_13_CTA ~ Negative_14b_Number, data = p5 )
+fita_1
+summary (fita_1)
+
+
+```
+
+
+```{r}
+fita_2<- lm(Action_13_CTA ~ Individual_14c_Number, data = p5 )
+fita_2
+summary (fita_2)
+fita_3 <- lm(Action_13_CTA ~ Collective_14d_Number, data = p5 )
+fita_3
+summary (fita_3)
+```
+
+
+```{r}
+library(performance)
+compare_performance(fita_0, fita_1, fita_2, fita_3, metrics = c("R2", "R2_adj"))
+```
+
+
+
+
+Partial effects
+
+```{r}
+fit1_0 <- lm(Action_13_CTA ~ Positive_14a_Number + Negative_14b_Number, data = p5 )
+fit1_0
+parameters(fit1_0)
+performance(fit1_0)
+plot(ggpredict(fit1_0, terms = c("Positive_14a_Number", "Negative_14b_Number[1,3,6]")))
+```
+
+
+
+```{r}
+fit1_1 <- lm(Action_13_CTA ~ Individual_14c_Number + Collective_14d_Number, data = p5 )
+fit1_1
+parameters(fit1_1)
+performance(fit1_1)
+plot(ggpredict(fit1_1, terms = c("Individual_14c_Number", "Collective_14d_Number[2,4,8]")))
+```
+
+
+Simple effects
+
+```{r}
+fit1_1 <- lm(Action_13_CTA ~ Positive_14a_Number * Negative_14b_Number, data = p5 )
+fit1_1
+parameters(fit1_1)
+performance(fit1_1)
+plot(ggpredict(fit1_1, terms = c("Positive_14a_Number", "Negative_14b_Number[1,3,6]")))
+```
+
+
+```{r}
+fit_check1_1 <- check_model(fit1_1)
+fit_check1_1
+```
+
+
+
+```{r}
+fit1_2 <- lm(Action_13_CTA ~ Individual_14c_Number * Collective_14d_Number, data = p5 )
+fit1_2
+parameters(fit1_2)
+performance(fit1_2)
+plot(ggpredict(fit1_2, terms = c("Individual_14c_Number", "Collective_14d_Number[2,4,8]")))
+```
+
+
+```{r}
+fit_check1_2 <- check_model(fit1_2)
+fit_check1_2
+```
+
+
+
+
+#https://stats.oarc.ucla.edu/r/dae/zinb/
+
+```{r}
+require(ggplot2)
+require(pscl)
+require(MASS)
+require(boot)
+```
+```{r}
+library(ggplot2)
+library(pscl)
+library(MASS)
+library(boot)
+```
+
+```{r}
+require(nonnest2)
+require(lmtest)
+```
+
+
+```{r}
+p2
+```
+
+
+```{r}
+colnames(p2)
+```
+
+
+###Zero inflated models 
+
+#Positive_14a_Number vs. RiskFactor_2_CTA (contibous vs. categories)
+
+```{r}
+m1_01 <- zeroinfl(Positive_14a_Number ~ RiskFactor_2_CTA, 
+  data = p2, dist = "negbin")
+summary(m1_01)
+```
+
+#Positive_14a_Number ~ minority_percent (continous vs. contious)
+```{r}
+m1_0 <- zeroinfl(Positive_14a_Number ~ minority_percent, 
+  data = p2, dist = "negbin")
+summary(m1_0)
+```
+
+
+```{r}
+m1_1 <- zeroinfl(Negative_14b_Number ~ minority_percent, 
+  data = p2, dist = "negbin")
+summary(m1_1)
+```
+
+```{r}
+m1_2 <- zeroinfl(Individual_14c_Number ~ minority_percent, 
+  data = p2, dist = "negbin")
+summary(m1_2)
+```
+
+```{r}
+m1_2 <- zeroinfl(Collective_14d_Number ~ minority_percent, 
+  data = p2, dist = "negbin")
+summary(m1_2)
+```
+
+
+###Risk factor vs. efficacy 
+
+#??? Is this the interactions? How to interprete that. 
+
+```{r}
+m1 <- zeroinfl(Action_13_CTA ~ efficacy_total|RiskFactor_2_CTA,
+  data = p2, dist = "negbin")
+summary(m1)
+```
+
+
+```{r}
+m2 <- zeroinfl(Action_13_CTA ~ efficacy_total1|RiskFactor_2_CTA,
+  data = p2, dist = "negbin")
+summary(m2)
+```
+
+
+
+
+
+
+########################################################################
+```{r}
+#DOH_uncetainty <- p %>% 
+ #  filter(UncertaintyReduction_5_CTA != 88)
+# DOH_uncetainty
+```
+
+
+```{r}
+#DOH_no88 <- p[p[,"RiskFactor_2_CTA"] != 88 | 
+ #               p[,"SocialDisparities_3_CTA"] != 88 | 
+ #               p[,"Debunk_4_CTA"] != 88 |  
+  #                p[,"UncertaintyReduction_5_CTA"] != 88 | 
+  #                p[,"Testing_6_CTA"] !=88 | 
+  #                p[,"Vaccine_7_CTA"]!= 88,
+   #             ]
+ # 
+ #  # DOH_no88
+```
+
+
+```{r}
+ # RiskFactor_2_CTA 
+ # SocialDisparities_3_CTA 
+ # Debunk_4_CTA 
+ # UncertaintyReduction_5_CTA 
+ # Testing_6_CTA 
+ # Vaccine_7_CTA 
+ # a
+```
+
+
+
+
+
+```{r}
+#a <- p[p$RiskFactor_2_CTA > 0 & p$SocialDisparities_3_CT > 0, 
+ # p$Debunk_4_CTA > 0 & p$UncertaintyReduction_5_CTA > 0, 
+ #   p$Testing_6_CTA > 0 & p$Vaccine_7_CTA > 0, 
+ # ]
+#a 
+```
+
+
+```{r}
+library("dplyr")  
+ # a <- filter(p, RiskFactor_2_CTA != 88)
+ # b <- filter(p, SocialDisparities_3_CTA != 88)
+ # c <- filter(p, Debunk_4_CTA != 88)
+ # d <- filter(p, UncertaintyReduction_5_CTA != 88)
+ # e <- filter(p, Testing_6_CTA != 88)
+ # f <- filter(p, Vaccine_7_CTA  != 88)
+ # k <- filter(p, Action_13_CTA  != 88)
+ # a
+ # b
+ # c
+ # d
+ # e
+ # f
+
+```
+
+```{r}
+ # DOH_no88 <- rbind(a, b, c, d, e,f)
+ # DOH_no88
+```
+
